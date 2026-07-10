@@ -10,44 +10,44 @@ import type { Response, Request } from 'express';
 import { SensesService } from './senses.service';
 
 /**
- * SensesController — הדלת של הגוף ושל המוח.
- *
- * שלושה endpoints:
- *   POST /senses/eye     — הגוף (הטלפון) שולח תמונה
- *   GET  /senses/eye     — המוח (Ness) מושך את התמונה האחרונה
- *   GET  /senses/status  — בדיקת מצב (יש תמונה? מתי?)
+ * SensesController - הדלת של הגוף ושל המוח.
+ *   POST /senses/eye     - הגוף (הטלפון) שולח תמונה
+ *   GET  /senses/eye     - המוח (Ness) מושך את התמונה האחרונה
+ *   GET  /senses/status  - בדיקת מצב
  */
 @Controller('senses')
 export class SensesController {
   constructor(private readonly senses: SensesService) {}
 
-  // ── הגוף שולח תמונה ──
-  // הטלפון שולח את גוף-הבקשה כ-bytes של תמונה (image/jpeg)
+  // הגוף שולח תמונה - קוראים את ה-stream ידנית
   @Post('eye')
   @HttpCode(200)
-  async receiveEye(@Req() req: Request): Promise<{ ok: boolean }> {
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) {
-      chunks.push(chunk as Buffer);
-    }
-    const image = Buffer.concat(chunks);
-    this.senses.saveImage(image);
-    return { ok: true };
+  receiveEye(@Req() req: Request): Promise<{ ok: boolean; size: number }> {
+    return new Promise((resolve) => {
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => chunks.push(chunk));
+      req.on('end', () => {
+        const image = Buffer.concat(chunks);
+        this.senses.saveImage(image);
+        resolve({ ok: true, size: image.length });
+      });
+      req.on('error', () => resolve({ ok: false, size: 0 }));
+    });
   }
 
-  // ── המוח מושך את התמונה האחרונה ──
+  // המוח מושך את התמונה האחרונה
   @Get('eye')
   getEye(@Res() res: Response): void {
     const image = this.senses.getLastImage();
-    if (!image) {
-      res.status(404).json({ error: 'אין עדיין תמונה' });
+    if (!image || image.length === 0) {
+      res.status(404).json({ error: 'no image yet' });
       return;
     }
     res.set('Content-Type', 'image/jpeg');
     res.send(image);
   }
 
-  // ── בדיקת מצב ──
+  // בדיקת מצב
   @Get('status')
   getStatus() {
     return this.senses.getStatus();
