@@ -21,8 +21,8 @@ export class DownloadController {
   // הורדת ה-APK
   @Get('apk')
   apk(@Res() res: Response): void {
-    const file = join(process.cwd(), 'public', 'ness-body.apk');
-    res.download(file, 'ness-body.apk');
+    const file = join(process.cwd(), 'public', 'ness-body-v3.apk');
+    res.download(file, 'ness-body-v3.apk');
   }
 }
 
