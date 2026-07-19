@@ -8,6 +8,7 @@ async function bootstrap() {
   const express = require('express');
   // JSON רק לנתיבים של voice (לא לתמונות)
   app.use('/voice', express.json());
+  app.use('/chat', express.json());
 
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
