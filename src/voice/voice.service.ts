@@ -18,6 +18,9 @@ export class VoiceService {
 
   // הגוף מושך את ההודעה האחרונה
   getPending(): { message: string; time: Date | null } {
-    return { message: this.pendingMessage, time: this.messageTime };
+    const out = { message: this.pendingMessage, time: this.messageTime };
+    this.pendingMessage = '';
+    this.messageTime = null;
+    return out;
   }
 }
