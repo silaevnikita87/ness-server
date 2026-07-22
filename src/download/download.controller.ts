@@ -21,8 +21,8 @@ export class DownloadController {
   // הורדת ה-APK
   @Get('apk')
   apk(@Res() res: Response): void {
-    const file = join(process.cwd(), 'public', 'ness-body-2026-07-22-ear.apk');
-    res.download(file, 'ness-body-2026-07-22-ear.apk');
+    const file = join(process.cwd(), 'public', 'ness-body-2026-07-23-wake.apk');
+    res.download(file, 'ness-body-2026-07-23-wake.apk');
   }
 }
 
