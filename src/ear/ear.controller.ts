@@ -11,6 +11,8 @@ import type { Request, Response } from 'express';
 export class EarController {
   private audio: Buffer | null = null;
   private time: Date | null = null;
+  private transcript = '';
+  private tTime: Date | null = null;
 
   @Post()
   upload(@Req() req: Request, @Res() res: Response): void {
@@ -21,6 +23,25 @@ export class EarController {
       this.time = new Date();
       res.json({ ok: true, bytes: this.audio.length });
     });
+  }
+
+  @Post('transcript')
+  setTranscript(@Req() req: Request, @Res() res: Response): void {
+    const chunks: Buffer[] = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => {
+      this.transcript = Buffer.concat(chunks).toString('utf8');
+      this.tTime = new Date();
+      res.json({ ok: true });
+    });
+  }
+
+  @Get('transcript')
+  getTranscript() {
+    const out = { text: this.transcript, time: this.tTime };
+    this.transcript = '';
+    this.tTime = null;
+    return out;
   }
 
   @Get('status')
